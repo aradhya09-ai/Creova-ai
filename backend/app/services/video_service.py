@@ -26,6 +26,14 @@ class GenerationError(Exception):
     pass
 
 
+def _report(on_progress, percent, phase):
+    if on_progress:
+        try:
+            on_progress(int(max(0, min(100, percent))), phase)
+        except Exception:
+            pass
+
+
 def _video_dir():
     d = Config.GENERATED_DIR / "videos"
     d.mkdir(parents=True, exist_ok=True)
@@ -150,7 +158,7 @@ def _encode_gif(frames, fps, out_path, W, H):
     )
 
 
-def _generate_demo_video(prompt, duration=5, aspect="16:9", fps=12, motion_strength=3):
+def _generate_demo_video(prompt, duration=5, aspect="16:9", fps=12, motion_strength=3, on_progress=None):
     ratio = {"16:9": (640, 360), "9:16": (360, 640), "1:1": (480, 480)}
     W, H = ratio.get(aspect, (640, 360))
     out_W, out_H = W, H
@@ -164,10 +172,14 @@ def _generate_demo_video(prompt, duration=5, aspect="16:9", fps=12, motion_stren
     # Render to disk as PNGs so encoders and GIF pipeline are equivalent
     frame_dir = d / f"{base}_frames"
     frame_dir.mkdir(exist_ok=True)
+    _report(on_progress, 8, "Rendering demo frames…")
     pil_frames = []
     for f in range(frames):
         img = _render_frame(W, H, f, frames, motion_strength)
         pil_frames.append(img)
+        _report(on_progress, 10 + int(60 * ((f + 1) / frames)), "Rendering demo frames…")
+
+    _report(on_progress, 72, "Encoding video…")
 
     if shutil.which("ffmpeg"):
         for i, img in enumerate(pil_frames):
@@ -250,7 +262,7 @@ def _veo_capabilities(model):
 
 
 def _generate_veo(prompt, mode, duration, aspect, style, camera, motion_strength,
-                  input_image_url, input_video_url):
+                  input_image_url, input_video_url, on_progress=None):
     """Google Veo via the Gemini API (free tier) — best free video quality.
 
     REST flow: POST :predict (:predictLongRunning for Veo 3.x) -> poll -> bytes.
@@ -297,6 +309,7 @@ def _generate_veo(prompt, mode, duration, aspect, style, camera, motion_strength
     method = ":predictLongRunning" if "veo-3" in model else ":predict"
 
     url = f"{host}/models/{model}{method}"
+    _report(on_progress, 15, f"Submitting to Veo…")
     resp = requests.post(url, headers=headers, json=body, timeout=180)
     if resp.status_code != 200:
         raise GenerationError(f"{model}: {_api_error(resp)}")
@@ -306,10 +319,13 @@ def _generate_veo(prompt, mode, duration, aspect, style, camera, motion_strength
     if not name:
         raise GenerationError(f"{model} returned no operation id.")
 
+    poll_count = 0
     for _ in range(300):  # poll up to ~12 min (Veo typically 1–4 min)
         if op.get("done"):
             break
         time.sleep(2)
+        poll_count += 1
+        _report(on_progress, 20 + min(55, poll_count), "Generating with Veo (1–4 min)…")
         poll = requests.get(f"{host}/{name}", headers=headers, timeout=120)
         if poll.status_code != 200:
             raise GenerationError(f"{model} status failed: {_api_error(poll)}")
@@ -338,6 +354,7 @@ def _generate_veo(prompt, mode, duration, aspect, style, camera, motion_strength
     if not video_bytes:
         raise GenerationError(f"{model} finished but returned no usable video bytes.")
 
+    _report(on_progress, 88, "Downloading video…")
     d = _video_dir()
     fn = f"vid_{uuid.uuid4().hex[:10]}.mp4"
     (d / fn).write_bytes(video_bytes)
@@ -491,7 +508,7 @@ def _video_first_frame_data_uri(url_or_name):
     )
 
 
-def _generate_pollinations(prompt, mode, duration, aspect, input_image_url=None):
+def _generate_pollinations(prompt, mode, duration, aspect, input_image_url=None, on_progress=None):
     """Video via Pollinations.ai (free key required; nova-reel is pollen-free).
 
     GET https://gen.pollinations.ai/video/{prompt}?model=...&duration=...&aspectRatio=...
@@ -522,10 +539,12 @@ def _generate_pollinations(prompt, mode, duration, aspect, input_image_url=None)
         params["image"] = abs_url
 
     url = f"{host}/video/{requests.utils.quote(prompt, safe='')}"
+    _report(on_progress, 15, "Submitting to Pollinations…")
     resp = requests.get(url, headers={"Authorization": f"Bearer {key}"}, params=params, timeout=1200)
     if resp.status_code != 200:
         raise GenerationError(f"Pollinations ({model}): {_api_error(resp)}")
 
+    _report(on_progress, 90, "Downloading video…")
     d = _video_dir()
     ext = "mp4"
     magic = resp.content
@@ -554,7 +573,7 @@ def _clamp_duration(duration, model):
 
 
 def _generate_agnes_v25(prompt, mode, duration, aspect, model, host, headers,
-                        input_image_url=None, input_video_url=None):
+                        input_image_url=None, input_video_url=None, on_progress=None):
     """Agnes Video 2.5 / 2.5-flash (seconds-based API, 4-12s, modes text/keyframe/reference)."""
     import requests
     import time
@@ -594,8 +613,11 @@ def _generate_agnes_v25(prompt, mode, duration, aspect, model, host, headers,
 
     deadline = time.time() + 1800
     final = None
+    poll_count = 0
     while time.time() < deadline:
-        time.sleep(20)
+        time.sleep(5)
+        poll_count += 1
+        _report(on_progress, 20 + min(58, poll_count * 2), "Generating with Agnes AI (1–3 min)…")
         try:
             pr = requests.get(
                 f"{host}/agnesapi",
@@ -626,6 +648,7 @@ def _generate_agnes_v25(prompt, mode, duration, aspect, model, host, headers,
     if not video_url:
         raise GenerationError(f"Agnes AI ({model}): no video URL in completed task")
 
+    _report(on_progress, 88, "Downloading video…")
     vr = requests.get(video_url, timeout=300)
     if vr.status_code != 200:
         raise GenerationError(f"Agnes AI ({model}): could not download result ({vr.status_code})")
@@ -645,7 +668,7 @@ def _generate_agnes_v25(prompt, mode, duration, aspect, model, host, headers,
     }
 
 
-def _generate_agnes(prompt, mode, duration, aspect, input_image_url=None, input_video_url=None):
+def _generate_agnes(prompt, mode, duration, aspect, input_image_url=None, input_video_url=None, on_progress=None):
     """Video via Agnes AI (genuinely free). Bearer key, 20 RPM rate cap.
 
     v2.0 family:  POST {host}/v1/videos  {model,prompt,width,height,num_frames,frame_rate}
@@ -673,10 +696,12 @@ def _generate_agnes(prompt, mode, duration, aspect, input_image_url=None, input_
         return _generate_agnes_v25(
             prompt, mode, duration, aspect,
             input_image_url=input_image_url, input_video_url=input_video_url,
-            model=model, host=host, headers=headers,
+            model=model, host=host, headers=headers, on_progress=on_progress,
         )
 
     num_frames, fps, width, height = _agnes_frame_plan(duration, aspect)
+
+    _report(on_progress, 8, "Preparing request…")
 
     payload = {
         "model": model,
@@ -705,14 +730,17 @@ def _generate_agnes(prompt, mode, duration, aspect, input_image_url=None, input_
     if not video_id:
         raise GenerationError(f"Agnes AI ({model}): no video_id in response: {resp.text[:200]}")
 
-    # Poll every 20s up to 30 min; use StreamResponse for progress
-    # (the classic /api/video/generate endpoint is synchronous so poll threads).
+    # Poll every 5s up to 30 min. Live progress (percent + phase) is pushed to
+    # the caller so the UI never appears stuck.
     import threading
     import time
     deadline = time.time() + 1800
     final = None
+    poll_count = 0
     while time.time() < deadline:
-        time.sleep(20)
+        time.sleep(5)
+        poll_count += 1
+        _report(on_progress, 20 + min(58, poll_count * 2), "Generating with Agnes AI (1–3 min)…")
         try:
             pr = requests.get(f"{host}/agnesapi?video_id={video_id}", headers=headers, timeout=30)
             if pr.status_code != 200:
@@ -757,7 +785,7 @@ def _generate_agnes(prompt, mode, duration, aspect, input_image_url=None, input_
 
 
 def _generate_endpoint(prompt, mode, duration, aspect, style, camera, motion_strength,
-                       input_image_url, input_video_url):
+                       input_image_url, input_video_url, on_progress=None):
     """Compatible video model service: POST <endpoint>/generate -> video bytes."""
     import requests
 
@@ -787,6 +815,7 @@ def _generate_endpoint(prompt, mode, duration, aspect, style, camera, motion_str
     if not resp.content:
         raise GenerationError("Video endpoint returned an empty response.")
 
+    _report(on_progress, 88, "Downloading video…")
     d = _video_dir()
     ext = "mp4"
     if resp.content[:8] == b"GIF87a" or resp.content[:8] == b"GIF89a":
@@ -817,6 +846,7 @@ def generate_video(
     input_image_url=None,
     input_video_url=None,
     force_demo=False,
+    on_progress=None,
 ):
     """Generate a video.
 
@@ -849,6 +879,7 @@ def generate_video(
                 try:
                     return _generate_agnes(
                         prompt, mode, duration, aspect, input_image_url, input_video_url,
+                        on_progress=on_progress,
                     )
                 except GenerationError as exc:
                     errors.append(str(exc))
@@ -860,6 +891,7 @@ def generate_video(
                 try:
                     return _generate_pollinations(
                         prompt, mode, duration, aspect, input_image_url,
+                        on_progress=on_progress,
                     )
                 except GenerationError as exc:
                     errors.append(str(exc))
@@ -871,7 +903,7 @@ def generate_video(
                 try:
                     return _generate_veo(
                         prompt, mode, duration, aspect, style, camera, motion_strength,
-                        input_image_url, input_video_url,
+                        input_image_url, input_video_url, on_progress=on_progress,
                     )
                 except GenerationError as exc:
                     errors.append(str(exc))
@@ -883,7 +915,7 @@ def generate_video(
                 try:
                     return _generate_endpoint(
                         prompt, mode, duration, aspect, style, camera, motion_strength,
-                        input_image_url, input_video_url,
+                        input_image_url, input_video_url, on_progress=on_progress,
                     )
                 except GenerationError as exc:
                     errors.append(str(exc))
@@ -899,4 +931,5 @@ def generate_video(
         duration=duration,
         aspect=aspect,
         motion_strength=motion_strength,
+        on_progress=on_progress,
     )

@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import { useAppStore } from '@/store/appStore'
+import { api } from '@/services/api'
 import AppLayout from '@/layouts/AppLayout'
 import ToastHost from '@/components/ToastHost'
 import Landing from '@/pages/Landing'
@@ -25,6 +26,18 @@ export default function App() {
     initTheme()
     checkSystem()
   }, [initTheme, checkSystem])
+
+  useEffect(() => {
+    if (!entered) return
+    const id = setInterval(async () => {
+      try {
+        await api.get('/api/health')
+      } catch (e) {
+        /* backend waking up */
+      }
+    }, 4 * 60 * 1000)
+    return () => clearInterval(id)
+  }, [entered])
 
   if (!entered) {
     return (

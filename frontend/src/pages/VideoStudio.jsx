@@ -31,6 +31,7 @@ export default function VideoStudio() {
 
   const [loading, setLoading] = useState(false)
   const [stage, setStage] = useState(0)
+  const [progress, setProgress] = useState(null)
   const [error, setError] = useState(null)
   const [result, setResult] = useState(null)
   const videoRef = useRef(null)
@@ -53,6 +54,7 @@ export default function VideoStudio() {
     setLoading(true)
     setError(null)
     setResult(null)
+    setProgress(null)
     setStage(0)
 
     const finalize = () => {
@@ -65,10 +67,24 @@ export default function VideoStudio() {
       push({ type: 'error', title: "Generation couldn't be completed.", message: msg })
     }
 
+    const waitTask = async (tid) => {
+      for (;;) {
+        await wait(2000)
+        let st = null
+        try {
+          st = await api.get(`/api/video/status/${tid}`)
+        } catch (e) {
+          continue
+        }
+        if (st.status === 'done') return st
+        if (st.status === 'error') throw new Error(st.error || 'Video generation failed')
+        setProgress({ percent: st.percent || 5, phase: st.phase })
+        setStage(st.percent < 12 ? 0 : st.percent < 20 ? 1 : st.percent < 60 ? 2 : 3)
+      }
+    }
+
     try {
       setStage(1)
-      await wait(400)
-      setStage(2)
       const payload = {
         prompt: prompt.trim(),
         mode,
@@ -82,15 +98,18 @@ export default function VideoStudio() {
         force_demo: !!opts?.forceDemo,
       }
       const res = await api.post('/api/video/generate', payload)
-      setResult(res.result)
+      const st = await waitTask(res.task_id)
+      const r = st.result
+      setProgress({ percent: 100, phase: 'Finalizing…' })
       setStage(3)
-      if (res.demo) {
+      setResult(r)
+      if (st.demo) {
         push({ type: 'demo', title: 'Demo Mode video', message: 'Procedural preview rendered. Add a free Agnes AI key in Settings → AI Providers for real generation.' })
-      } else if (res.mode === 'agnes') {
-        push({ type: 'success', title: 'Video ready', message: `${duration}s video generated with Agnes AI (${res.model}).` })
-      } else if (res.mode === 'pollinations') {
-        push({ type: 'success', title: 'Video ready', message: `${duration}s video generated with Pollinations (${res.model}).` })
-      } else if (res.mode === 'gemini') {
+      } else if (st.mode === 'agnes') {
+        push({ type: 'success', title: 'Video ready', message: `${duration}s video generated with Agnes AI (${st.model}).` })
+      } else if (st.mode === 'pollinations') {
+        push({ type: 'success', title: 'Video ready', message: `${duration}s video generated with Pollinations (${st.model}).` })
+      } else if (st.mode === 'gemini') {
         push({ type: 'success', title: 'Video ready', message: `${duration}s ${style.toLowerCase()} video generated with Veo 2.` })
       } else {
         push({ type: 'success', title: 'Video ready', message: `${duration}s ${style.toLowerCase()} video generated.` })
@@ -132,7 +151,7 @@ export default function VideoStudio() {
 
       {loading && (
         <div className="fixed inset-0 z-[85] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-          <GenerationStage type="video" stage={stage} />
+          <GenerationStage type="video" stage={stage} progress={progress} />
         </div>
       )}
 
