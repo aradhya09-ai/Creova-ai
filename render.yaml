@@ -1,0 +1,45 @@
+# Render Blueprint — CREOVA AI backend
+#
+# Deploy:
+#   1. Push this repo (with render.yaml) to GitHub.
+#   2. https://dashboard.render.com -> New -> Blueprint -> connect your GitHub repo.
+#   3. Render provisions the `creova-ai-backend` web service below.
+#   4. In the service's Environment tab, set the dashboard-only secrets
+#      (AGNES_KEY, POLLINATIONS_KEY, GEMINI_API_KEY). They are marked
+#      `sync: false` so values live in the Dashboard, never in git.
+#
+# Notes:
+#   - Free instances sleep after ~15 min idle; the first request may take
+#     30-60s to wake up.
+#   - Free instances use an ephemeral filesystem: SQLite history and
+#     generated files reset on redeploy/restart. Provider keys set as env
+#     vars above survive because they are not stored in the DB.
+#   - Long synchronous requests (video generation polls Agnes for minutes)
+#     are fine here — Render is a real long-running server, unlike Vercel.
+
+services:
+  - type: web
+    name: creova-ai-backend
+    runtime: python
+    plan: free
+    region: oregon
+    branch: main
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12"
+      - key: VIDEO_BACKEND
+        value: auto
+
+      # ---- Provider keys (dashboard-only; absent from git) ----
+      - key: AGNES_KEY
+        sync: false
+      - key: POLLINATIONS_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: HUGGINGFACE_TOKEN
+        sync: false

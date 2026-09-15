@@ -8,6 +8,9 @@ pydantic>=2.8.0
 pydantic-settings>=2.3.0
 requests>=2.32.0
 aiofiles>=23.2.1
+python-dotenv>=1.0.1
+edge-tts>=7.0.0
+av>=13.0.0
 
 # Optional - enabled only if explicitly installed for local generation
 # torch>=2.3.0

@@ -81,9 +81,18 @@ creova-ai/
 
 ## How to enable live generation (not demo mode)
 
+> **Fastest path: Agnes AI (free, no card).** Add one key in
+> **Settings → AI Providers** (`AGNES_KEY`) and both **image** and **video**
+> generation work for real with no paywall. It is the default backend.
+
 ### Image generation
 
-**Option A — Hugging Face free tier (no GPU needed)**
+**Option A — Agnes AI (free, current default)** ✔ recommended
+
+1. Get a free key at <https://agnes-ai.com> (no payment needed)
+2. In the app go to **Settings → AI Providers**
+
+**Option B — Hugging Face free tier (no GPU needed)**
 
 1. Get a free token at <https://huggingface.co/settings/tokens>
    (create it with the **"Inference Providers"** permission)
@@ -107,7 +116,14 @@ The image service detects these automatically and uses `stabilityai/sdxl-turbo`.
 
 ### Video generation
 
-**Option A — Google Veo 2 (free tier, best quality)** ✔ recommended
+**Option A — Agnes AI (free, current default)** ✔ recommended
+
+1. Get a free key at <https://agnes-ai.com>
+2. In **Settings → AI Providers**, paste it and pick **Agnes AI (free)**
+3. Keep the model on **agnes-video-v2.0** (free, up to 60s) or **agnes-video-2.5-flash** (free, 4–12s)
+4. Text→Video, Image→Video and Video→Video all work
+
+**Option B — Google Veo 2 (free tier, best quality when quota allows)**
 
 1. Go to <https://aistudio.google.com> and sign in with any Google account
 2. Click **"Get API key"** → **Create API key** (free, no credit card)
@@ -263,43 +279,47 @@ Copy `backend/.env.example` to `backend/.env` and configure:
 
 ---
 
-## Production deployment
+## Production deployment (Vercel + Render)
 
-### Frontend
+This project deploys as **two pieces**: the React frontend on **Vercel** and the
+FastAPI backend on **Render** (a real long-running server — required because
+video generation polls Agnes for minutes, which Vercel serverless functions
+cannot do).
 
-```bash
-cd frontend
-npm run build
-# Serve dist/ via Nginx, Vercel, Cloudflare Pages, or any static host
-```
+### 1. Backend → Render
 
-In production, point Vite's proxy to your backend by setting `VITE_API_URL` in `.env`:
-```
-VITE_API_URL=https://api.yourdomain.com
-```
+`render.yaml` is already in the repo root. Deploy:
 
-### Backend
+1. Push this repo to GitHub (e.g. `github.com/aradhya09-ai/Creova-ai`).
+2. Go to <https://dashboard.render.com> → **New** → **Blueprint**.
+3. Connect your repo — Render provisions the `creova-ai-backend` service.
+4. In the service **Environment** tab, set the dashboard-only secrets
+   (values are never in git):
+   - `AGNES_KEY` — Agnes AI key (free video + image, **required for real output**)
+   - `POLLINATIONS_KEY` — optional fallback
+   - `GEMINI_API_KEY` — optional Veo fallback
+5. Deploy. The backend gets a public URL like
+   `https://creova-ai-backend.onrender.com` (confirm `/api/health` returns 200).
 
-```bash
-cd backend
-pip install -r requirements.txt
-uvicorn app.main:app --host 0.0.0.0 --port 8000
-```
+> Free Render instances **sleep after ~15 min idle** (first request wakes them,
+> ~30-60s) and use an **ephemeral filesystem**: SQLite history and generated
+> files reset on redeploy/restart. Provider keys set as env vars survive
+> because they are read from the environment, not the DB. A persistent disk
+> (paid) under `/var/data` with `GENERATED_DIR`/`UPLOAD_DIR` pointed at it keeps
+> everything across deploys.
 
-Or with Gunicorn:
-```bash
-gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
-```
+### 2. Frontend → Vercel
 
-In production the frontend should be served by Nginx or a CDN with the `/api` proxy:
-```nginx
-location /api {
-    proxy_pass http://127.0.0.1:8000;
-}
-location /generated {
-    proxy_pass http://127.0.0.1:8000;
-}
-```
+`vercel.json` is already in the repo root (`rootDirectory: "frontend"`). Deploy:
+
+1. Go to <https://vercel.com> → **Add New Project** → import your GitHub repo.
+2. Vercel auto-detects Vite; build command `npm run build`, output `dist`.
+3. In the project **Env Vars**, add:
+   - `VITE_API_URL` = your Render backend URL, e.g. `https://creova-ai-backend.onrender.com`
+4. **Deploy**. The frontend now calls your hosted backend directly.
+   (Leave this unset locally — the Vite dev proxy handles `localhost:8000`.)
+
+CORS is already open (`*`) on the backend, so no origin config is needed.
 
 ---
 
