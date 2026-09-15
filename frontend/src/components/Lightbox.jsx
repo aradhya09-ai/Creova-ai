@@ -2,9 +2,10 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useCallback } from 'react'
 import { X, Download, ZoomIn, ZoomOut, RotateCcw, Loader } from 'lucide-react'
 import { downloads } from '@/services/downloads'
+import { mediaUrl } from '@/services/api'
 
 export default function Lightbox({ item, open, onClose, title }) {
-  const url = item?.url
+  const url = mediaUrl(item?.url)
 
   const handleKey = useCallback(
     (e) => {

@@ -4,7 +4,7 @@ import {
   RefreshCw, Download, Trash2, Image as ImageIcon, Video, Music, CreditCard as CardIcon,
   ExternalLink,
 } from 'lucide-react'
-import { api } from '@/services/api'
+import { api, mediaUrl } from '@/services/api'
 import toast from '@/services/toast'
 import downloads from '@/services/downloads'
 import PageHeader from '@/components/PageHeader'
@@ -98,9 +98,9 @@ export default function HistoryPage() {
                 <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-base">
                   {item.preview ? (
                     item.type === 'video' || /\.(mp4|webm)(\?|$)/.test(item.preview) ? (
-                      <video src={item.preview} className="h-full w-full object-cover" muted />
+                      <video src={mediaUrl(item.preview)} className="h-full w-full object-cover" muted />
                     ) : (
-                      <img src={item.preview} alt={item.prompt} onClick={() => setLightbox({ type: item.type, url: item.preview, prompt: item.prompt })} className="h-full w-full cursor-pointer object-cover transition-transform group-hover:scale-105" />
+                      <img src={mediaUrl(item.preview)} alt={item.prompt} onClick={() => setLightbox({ type: item.type, url: item.preview, prompt: item.prompt })} className="h-full w-full cursor-pointer object-cover transition-transform group-hover:scale-105" />
                     )
                   ) : (
                     <div className={cn('flex h-full w-full items-center justify-center', m.tint)}>
@@ -140,8 +140,9 @@ function Action({ item, onDelete }) {
       {item.preview && (
         <button
           onClick={async () => {
-            const parts = item.preview.split('/')
-            await downloads.save(item.preview, parts[parts.length - 1] || item.type)
+            const full = mediaUrl(item.preview)
+            const parts = full.split('/')
+            await downloads.save(full, parts[parts.length - 1] || item.type)
             toast.success('Download started', 'File saved.')
           }}
           className="btn-ghost !px-2.5 !py-2"

@@ -4,7 +4,7 @@ import {
   Clapperboard, Film, Upload, RefreshCw, Download, Maximize2, Play, Pause, Save, Wand,
   Type, Image as ImageIcon,
 } from 'lucide-react'
-import { api } from '@/services/api'
+import { api, mediaUrl } from '@/services/api'
 import toast from '@/services/toast'
 import downloads from '@/services/downloads'
 import { useAppStore } from '@/store/appStore'
@@ -304,12 +304,12 @@ export default function VideoStudio() {
               <div className="relative">
                 {result.container === 'gif' || /\.gif(\?|$)/.test(result.url || '') ? (
                   <div className="aspect-video w-full bg-black">
-                    <img src={result.url} alt={prompt} className="h-full w-full object-contain" />
+                    <img src={mediaUrl(result.url)} alt={prompt} className="h-full w-full object-contain" />
                   </div>
                 ) : (
                   <video
                     ref={videoRef}
-                    src={result.url}
+                    src={mediaUrl(result.url)}
                     controls
                     loop
                     className="aspect-video w-full bg-black"
@@ -327,8 +327,9 @@ export default function VideoStudio() {
                 </button>
                 <button onClick={async () => {
                   try {
-                    const parts = result.url.split('/')
-                    await downloads.save(result.url, parts[parts.length - 1] || 'video.mp4')
+                    const full = mediaUrl(result.url)
+                    const parts = full.split('/')
+                    await downloads.save(full, parts[parts.length - 1] || 'video.mp4')
                     toast.success('Download started', 'MP4 saved.')
                   } catch (e) {
                     toast.error('Download failed', e.message)

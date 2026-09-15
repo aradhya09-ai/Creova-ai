@@ -5,7 +5,7 @@ import {
   Sparkles, Image as ImageIcon, Video, Mic, LayoutPanelTop, ArrowRight, Wand,
   TrendingUp, Clock, Folder, Flame,
 } from 'lucide-react'
-import { api } from '@/services/api'
+import { api, mediaUrl } from '@/services/api'
 import toast from '@/services/toast'
 import { useAppStore } from '@/store/appStore'
 import GenerationStage from '@/components/GenerationStage'
@@ -239,7 +239,7 @@ export default function Home() {
               >
                 <div className="relative aspect-[4/3] overflow-hidden bg-white/5">
                   {r.preview ? (
-                    <img src={r.preview} alt={r.prompt} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <img src={mediaUrl(r.preview)} alt={r.prompt} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                   ) : (
                     <div className="flex h-full items-center justify-center text-slate-600">
                       <Folder size={24} />

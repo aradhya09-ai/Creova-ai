@@ -4,7 +4,7 @@ import {
   Download, Trash2, Play, Image as ImageIcon, Video, Music, CreditCard as CardIcon,
   HardDrive, FolderOpen, ExternalLink,
 } from 'lucide-react'
-import { api } from '@/services/api'
+import { api, mediaUrl } from '@/services/api'
 import toast from '@/services/toast'
 import downloads from '@/services/downloads'
 import PageHeader from '@/components/PageHeader'
@@ -73,7 +73,7 @@ export default function DownloadsPage() {
                 className="card-hover overflow-hidden rounded-2xl border border-white/10 bg-surface"
               >
                 <div className="relative h-36 overflow-hidden bg-base">
-                  <img src={item.preview} alt={item.prompt} className="h-full w-full object-cover" />
+                  <img src={mediaUrl(item.preview)} alt={item.prompt} className="h-full w-full object-cover" />
                   <span className="absolute left-2 top-2 inline-flex items-center gap-1.5 rounded-full bg-black/50 px-2 py-0.5 text-[10px] font-medium capitalize text-white backdrop-blur-sm">
                     <Icon size={11} className={m.tint.split(' ')[0]} /> {item.type}
                   </span>
@@ -84,9 +84,10 @@ export default function DownloadsPage() {
                   <div className="mt-2.5 flex gap-1.5">
                     <button
                       onClick={async () => {
-                        const parts = item.preview.split('/')
+                        const full = mediaUrl(item.preview)
+                        const parts = full.split('/')
                         try {
-                          await downloads.save(item.preview, parts[parts.length - 1] || item.type)
+                          await downloads.save(full, parts[parts.length - 1] || item.type)
                           toast.success('Download started', 'File saved.')
                         } catch (e) {
                           toast.error('Download failed', e.message)

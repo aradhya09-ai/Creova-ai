@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Search } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { api } from '@/services/api'
+import { api, mediaUrl } from '@/services/api'
 import { useAppStore } from '@/store/appStore'
 
 export default function Spotlight({ open, onClose }) {
@@ -90,7 +90,7 @@ export default function Spotlight({ open, onClose }) {
                 >
                   {i.preview ? (
                     <img
-                      src={i.preview}
+                      src={mediaUrl(i.preview)}
                       alt=""
                       className="h-10 w-10 shrink-0 rounded-lg border border-white/10 object-cover"
                     />

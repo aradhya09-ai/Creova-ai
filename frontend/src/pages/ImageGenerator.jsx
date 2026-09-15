@@ -4,7 +4,7 @@ import {
   Sparkles, Download, Copy, RefreshCw, Trash2, Maximize2, Wand,
   Zap, SlidersHorizontal, Shield,
 } from 'lucide-react'
-import { api } from '@/services/api'
+import { api, mediaUrl } from '@/services/api'
 import toast from '@/services/toast'
 import downloads from '@/services/downloads'
 import { useAppStore } from '@/store/appStore'
@@ -75,15 +75,15 @@ export default function ImageGenerator() {
 
   const handleDownload = async (img, format) => {
     try {
-      let url = img.url
+      let url = mediaUrl(img.url)
       let name = img.filename || 'image'
       if (format === 'jpg') {
         const conv = await api.post('/api/image/convert', { filename: img.filename, format: 'jpg' })
-        url = conv.result.url
+        url = mediaUrl(conv.result.url)
         name = conv.result.filename
       } else if (format === 'png' && !/\.png(\?|$)/.test(url)) {
         const conv = await api.post('/api/image/convert', { filename: img.filename, format: 'png' })
-        url = conv.result.url
+        url = mediaUrl(conv.result.url)
         name = conv.result.filename
       }
       await downloads.save(url, name)
@@ -293,7 +293,7 @@ export default function ImageGenerator() {
                   className="group overflow-hidden rounded-2xl border border-white/10 bg-surface"
                 >
                   <div className="relative cursor-pointer" onClick={() => setLightbox(img)}>
-                    <img src={img.url} alt={img.prompt} className="w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" />
+                    <img src={mediaUrl(img.url)} alt={img.prompt} className="w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" />
                     {img.demo && (
                       <span className="absolute left-2 top-2 rounded-full bg-amber-500/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-amber-300 backdrop-blur-sm">
                         Demo asset

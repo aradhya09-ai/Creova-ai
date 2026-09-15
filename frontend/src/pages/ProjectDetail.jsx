@@ -5,7 +5,7 @@ import {
   ArrowLeft, Download, Trash2, Plus, Image as ImageIcon, Video, Music, CreditCard as CardIcon,
   Copy, Save,
 } from 'lucide-react'
-import { api } from '@/services/api'
+import { api, mediaUrl } from '@/services/api'
 import toast from '@/services/toast'
 import downloads from '@/services/downloads'
 import Lightbox from '@/components/Lightbox'
@@ -56,8 +56,9 @@ export default function ProjectDetail() {
   const downloadAll = async () => {
     for (const a of project.assets || []) {
       if (!a.url) continue
-      const parts = a.url.split('/')
-      await downloads.save(a.url, parts[parts.length - 1] || a.type)
+      const full = mediaUrl(a.url)
+      const parts = full.split('/')
+      await downloads.save(full, parts[parts.length - 1] || a.type)
     }
     toast.success('Downloading assets', 'All project files are being saved.')
   }
@@ -141,9 +142,9 @@ export default function ProjectDetail() {
                 <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-base">
                   {a.url ? (
                     a.type === 'video' ? (
-                      <video src={a.url} className="h-full w-full object-cover" muted />
+                      <video src={mediaUrl(a.url)} className="h-full w-full object-cover" muted />
                     ) : (
-                      <img src={a.url} alt={a.prompt || ''} onClick={() => setLightbox({ type: a.type, url: a.url, prompt: a.prompt })} className="h-full w-full cursor-pointer object-cover" />
+                      <img src={mediaUrl(a.url)} alt={a.prompt || ''} onClick={() => setLightbox({ type: a.type, url: a.url, prompt: a.prompt })} className="h-full w-full cursor-pointer object-cover" />
                     )
                   ) : (
                     <Icon size={20} className={TYPE_COLORS[a.type] || 'text-slate-500'} />
@@ -156,8 +157,9 @@ export default function ProjectDetail() {
                 {a.url && (
                   <button
                     onClick={async () => {
-                      const parts = a.url.split('/')
-                      await downloads.save(a.url, parts[parts.length - 1] || a.type)
+                      const full = mediaUrl(a.url)
+                      const parts = full.split('/')
+                      await downloads.save(full, parts[parts.length - 1] || a.type)
                       toast.success('Downloading', 'Asset saved.')
                     }}
                     className="btn-ghost !px-2.5 !py-2"

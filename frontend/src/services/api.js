@@ -1,5 +1,11 @@
 const BASE = import.meta.env.VITE_API_URL || ''
 
+/** Resolve a backend-relative media path (/generated/... or /uploads/...)
+ *  against VITE_API_URL so it works from any host (Vercel -> Render).
+ *  Locally BASE is '' and the Vite dev proxy resolves it. */
+export const mediaUrl = (path) => `${BASE}${path || ''}`
+export const downloadUrl = mediaUrl
+
 async function request(path, options = {}) {
   const url = `${BASE}${path}`
   const opts = {
@@ -41,5 +47,3 @@ export const api = {
   },
   _request: request,
 }
-
-export const downloadUrl = (path) => `${BASE}${path}`

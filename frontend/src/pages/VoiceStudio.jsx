@@ -4,7 +4,7 @@ import {
   Mic, AudioLines, UserCog, Play, Pause, Download, Volume2, Upload,
   Trash2, ShieldCheck, FileAudio, Sparkles,
 } from 'lucide-react'
-import { api } from '@/services/api'
+import { api, mediaUrl } from '@/services/api'
 import toast from '@/services/toast'
 import downloads from '@/services/downloads'
 import { useAppStore } from '@/store/appStore'
@@ -220,13 +220,13 @@ function TTSView({ push }) {
               </div>
             ) : (
               <div className="space-y-3">
-                <audio ref={audioRef} src={previewUrl.url} controls className="w-full" />
+                <audio ref={audioRef} src={mediaUrl(previewUrl.url)} controls className="w-full" />
                 <div className="flex gap-2">
                   <button onClick={async () => {
-                    try { await downloads.save(previewUrl.url, 'voice.mp3'); toast.success('Download started', 'MP3 saved.') } catch (e) { toast.error('Download failed', e.message) }
+                    try { await downloads.save(mediaUrl(previewUrl.url), 'voice.mp3'); toast.success('Download started', 'MP3 saved.') } catch (e) { toast.error('Download failed', e.message) }
                   }} className="btn-outline !py-2 text-xs flex-1"><Download size={14} /> MP3</button>
                   <button onClick={async () => {
-                    try { await downloads.save(previewUrl.url, 'voice.wav'); toast.success('Download started', 'WAV saved.') } catch (e) { toast.error('Download failed', e.message) }
+                    try { await downloads.save(mediaUrl(previewUrl.url), 'voice.wav'); toast.success('Download started', 'WAV saved.') } catch (e) { toast.error('Download failed', e.message) }
                   }} className="btn-outline !py-2 text-xs flex-1"><Download size={14} /> WAV</button>
                 </div>
               </div>

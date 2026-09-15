@@ -5,7 +5,7 @@ import {
   Folder, Plus, Trash2, EllipsisVertical, Download, Image as ImageIcon, Video, Music, CreditCard as CardIcon,
   FolderPlus,
 } from 'lucide-react'
-import { api } from '@/services/api'
+import { api, mediaUrl } from '@/services/api'
 import toast from '@/services/toast'
 import PageHeader from '@/components/PageHeader'
 import Modal from '@/components/Modal'
@@ -111,7 +111,7 @@ export default function Projects() {
                       assets.slice(0, 4).map((a, j) => (
                         <div key={j} className="relative flex-1 overflow-hidden rounded-lg bg-white/5">
                           {a.url ? (
-                            <img src={a.url} alt={a.prompt || ''} className="h-full w-full object-cover" />
+                            <img src={mediaUrl(a.url)} alt={a.prompt || ''} className="h-full w-full object-cover" />
                           ) : (
                             <div className="flex h-full items-center justify-center text-slate-600">
                               {(() => { const I = TYPE_ICONS[a.type] || Folder; return <I size={16} /> })()}
