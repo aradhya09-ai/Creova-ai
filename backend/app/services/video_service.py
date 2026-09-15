@@ -517,7 +517,8 @@ def _generate_pollinations(prompt, mode, duration, aspect, input_image_url=None)
     if mode == "image" and input_image_url:
         abs_url = input_image_url
         if abs_url.startswith("/"):
-            abs_url = f"http://127.0.0.1:8000{abs_url}"
+            base = (Config.PUBLIC_BASE_URL or "").rstrip("/")
+            abs_url = f"{base}{abs_url}" if base else f"http://127.0.0.1:8000{abs_url}"
         params["image"] = abs_url
 
     url = f"{host}/video/{requests.utils.quote(prompt, safe='')}"

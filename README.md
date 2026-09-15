@@ -310,13 +310,16 @@ cannot do).
 
 ### 2. Frontend → Vercel
 
-`vercel.json` is already in the repo root (`rootDirectory: "frontend"`). Deploy:
+`frontend/vercel.json` is already in the repo (note: Vercel needs the project's
+**Root Directory** set to `frontend` — there is no `rootDirectory` field in
+`vercel.json`, Vercel removed it from the schema). Deploy:
 
 1. Go to <https://vercel.com> → **Add New Project** → import your GitHub repo.
-2. Vercel auto-detects Vite; build command `npm run build`, output `dist`.
-3. In the project **Env Vars**, add:
+2. **Root Directory: `frontend`** (Settings → General → Root Directory → `frontend`).
+3. Vercel auto-detects Vite; build command `npm run build`, output `dist`.
+4. In the project **Env Vars**, add:
    - `VITE_API_URL` = your Render backend URL, e.g. `https://creova-ai-backend.onrender.com`
-4. **Deploy**. The frontend now calls your hosted backend directly.
+5. **Deploy**. The frontend now calls your hosted backend directly.
    (Leave this unset locally — the Vite dev proxy handles `localhost:8000`.)
 
 CORS is already open (`*`) on the backend, so no origin config is needed.

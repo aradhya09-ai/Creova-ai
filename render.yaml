@@ -34,6 +34,12 @@ services:
       - key: VIDEO_BACKEND
         value: auto
 
+      # PUBLIC_BASE_URL defaults to Render's auto-injected RENDER_EXTERNAL_URL,
+      # which the backend uses to build public URLs for image-to-video
+      # references (pollinations fallback). No action needed.
+      - key: PUBLIC_BASE_URL
+        sync: false
+
       # ---- Provider keys (dashboard-only; absent from git) ----
       - key: AGNES_KEY
         sync: false

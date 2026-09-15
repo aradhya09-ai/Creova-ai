@@ -57,6 +57,11 @@ class Config:
     AGNES_IMAGE_MODEL = os.getenv("AGNES_IMAGE_MODEL", "agnes-image-2.5-flash")
     VIDEO_BACKEND = os.getenv("VIDEO_BACKEND", "auto")  # auto | agnes | pollinations | veo | endpoint
 
+    # Public URL of this backend, used to build absolute URLs for media refs
+    # the model providers must be able to fetch. Render injects
+    # RENDER_EXTERNAL_URL automatically; override with PUBLIC_BASE_URL if needed.
+    PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "") or os.getenv("RENDER_EXTERNAL_URL", "")
+
     @classmethod
     def hf_token(cls):
         return _settings_map().get("hf_token") or os.getenv("HUGGINGFACE_TOKEN", "") or cls.HUGGINGFACE_TOKEN
