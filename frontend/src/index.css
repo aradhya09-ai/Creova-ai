@@ -1,0 +1,104 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-void text-slate-200 antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(139, 92, 246, 0.35) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: rgba(139, 92, 246, 0.3);
+    border-radius: 8px;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/[0.04] backdrop-blur-xl border border-purple-500/10;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-purple-500/50 active:scale-[0.98];
+  }
+  .btn-primary {
+    @apply btn bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-glow-sm hover:shadow-glow hover:from-purple-500 hover:to-indigo-500;
+  }
+  .btn-outline {
+    @apply btn border border-purple-500/30 text-slate-200 hover:border-purple-400/60 hover:bg-purple-500/10;
+  }
+  .btn-ghost {
+    @apply btn text-slate-400 hover:text-white hover:bg-white/5;
+  }
+  .input {
+    @apply w-full rounded-xl bg-base/80 border border-purple-500/15 px-4 py-3 text-sm text-slate-200 placeholder-slate-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500/40 focus:border-purple-500/40;
+  }
+  .chip {
+    @apply cursor-pointer rounded-full border px-4 py-2 text-sm font-medium transition-all duration-200;
+  }
+  .chip-active {
+    @apply border-purple-500/60 bg-purple-500/15 text-purple-200 shadow-glow-sm;
+  }
+  .chip-inactive {
+    @apply border-white/10 text-slate-400 hover:border-purple-500/30 hover:text-slate-200;
+  }
+  .panel {
+    @apply glass rounded-2xl;
+  }
+  .card-hover {
+    @apply transition-all duration-300 hover:border-purple-500/30 hover:shadow-glow-sm hover:bg-white/[0.06];
+  }
+  .label {
+    @apply text-xs font-semibold uppercase tracking-wider text-slate-500;
+  }
+  .divider {
+    @apply h-px w-full bg-gradient-to-r from-transparent via-purple-500/20 to-transparent;
+  }
+}
+
+.skeleton {
+  @apply relative overflow-hidden rounded-xl bg-white/[0.04];
+}
+.skeleton::after {
+  content: '';
+  @apply absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-purple-500/10 to-transparent;
+  background-size: 200% 100%;
+}
+
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(139, 92, 246, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139, 92, 246, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.text-gradient {
+  @apply bg-gradient-to-r from-purple-300 via-indigo-300 to-violet-300 bg-clip-text text-transparent;
+}
+
+.gradient-border {
+  position: relative;
+  background: linear-gradient(#0a0a14, #0a0a14) padding-box,
+    linear-gradient(135deg, rgba(139, 92, 246, 0.5), rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.5)) border-box;
+  border: 1px solid transparent;
+}
+
+.range-input {
+  @apply w-full h-1.5 cursor-pointer appearance-none rounded-full bg-purple-500/20;
+}
+.range-input::-webkit-slider-thumb {
+  @apply h-4 w-4 appearance-none rounded-full bg-purple-400 shadow-glow-sm;
+}
