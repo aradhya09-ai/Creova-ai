@@ -191,6 +191,16 @@ export default function AppLayout({ children }) {
       </div>
 
       <Spotlight open={spotlightOpen} onClose={() => setSpotlightOpen(false)} />
+
+      {/* Corner branding */}
+      <a
+        href="https://github.com/aradhya09-ai"
+        target="_blank"
+        rel="noreferrer"
+        className="fixed bottom-3 right-4 z-[60] rounded-full border border-purple-500/25 bg-panel/80 px-3 py-1.5 text-xs font-semibold text-slate-400 backdrop-blur-md transition-colors hover:text-purple-400 sm:text-[13px]"
+      >
+        @aradhya_codes
+      </a>
     </div>
   )
 }

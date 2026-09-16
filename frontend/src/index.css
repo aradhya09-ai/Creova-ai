@@ -2,6 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Theme palette (dark default). Values are RGB triplets so opacity
+   modifiers like bg-panel/80 keep working. */
+:root {
+  --c-void: 5 5 10;
+  --c-panel: 10 10 20;
+  --c-surface: 17 17 32;
+  --c-elevated: 22 22 42;
+}
+
+.light {
+  --c-void: 242 243 248;
+  --c-panel: 255 255 255;
+  --c-surface: 238 239 246;
+  --c-elevated: 228 229 238;
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
@@ -91,7 +107,7 @@
 
 .gradient-border {
   position: relative;
-  background: linear-gradient(#0a0a14, #0a0a14) padding-box,
+  background: linear-gradient(rgb(var(--c-panel)), rgb(var(--c-panel))) padding-box,
     linear-gradient(135deg, rgba(139, 92, 246, 0.5), rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.5)) border-box;
   border: 1px solid transparent;
 }
@@ -101,4 +117,108 @@
 }
 .range-input::-webkit-slider-thumb {
   @apply h-4 w-4 appearance-none rounded-full bg-purple-400 shadow-glow-sm;
+}
+
+/* ---------- Light theme refinements ---------- */
+.light body {
+  color: #1e293b;
+}
+.light .text-white {
+  color: #14141f;
+}
+.light .text-slate-100,
+.light .text-slate-200 {
+  color: #1e293b;
+}
+.light .text-slate-300 {
+  color: #334155;
+}
+.light .text-slate-400 {
+  color: #475569;
+}
+.light .text-slate-500 {
+  color: #64748b;
+}
+.light .text-slate-600 {
+  color: #94a3b8;
+}
+.light .text-purple-200 {
+  color: #6d28d9;
+}
+.light .text-purple-300 {
+  color: #7c3aed;
+}
+.light .text-purple-400 {
+  color: #8b5cf6;
+}
+.light .text-emerald-200,
+.light .text-emerald-300 {
+  color: #065f46;
+}
+.light .text-emerald-400 {
+  color: #059669;
+}
+.light .text-amber-100 {
+  color: #92400e;
+}
+.light .text-amber-200,
+.light .text-amber-300 {
+  color: #a16207;
+}
+.light .text-amber-400 {
+  color: #d97706;
+}
+.light .text-rose-300 {
+  color: #be123c;
+}
+.light .text-rose-400 {
+  color: #e11d48;
+}
+.light .text-fuchsia-300 {
+  color: #c026d3;
+}
+.light .text-indigo-300 {
+  color: #4338ca;
+}
+.light .text-violet-300 {
+  color: #6d28d9;
+}
+.light .text-sky-300 {
+  color: #0369a1;
+}
+.light .text-sky-400 {
+  color: #0284c7;
+}
+.light .text-gradient {
+  background-image: linear-gradient(to right, #7c3aed, #4f46e5, #6d28d9);
+}
+.light .border-white\/10 {
+  border-color: rgba(148, 163, 184, 0.35);
+}
+.light .border-white\/5 {
+  border-color: rgba(148, 163, 184, 0.25);
+}
+.light .bg-white\/5,
+.light .hover\:bg-white\/5:hover,
+.light .group\/hover\:bg-white\/5:hover {
+  background-color: rgba(148, 163, 184, 0.14);
+}
+.light .bg-white\/\[0\.02\],
+.light .bg-white\/\[0\.03\],
+.light .bg-white\/\[0\.04\],
+.light .bg-white\/\[0\.06\],
+.light .bg-white\/\[0\.15\] {
+  background-color: rgba(148, 163, 184, 0.12);
+}
+.light .placeholder-slate-500::placeholder {
+  color: #94a3b8;
+}
+.light .glass {
+  @apply bg-white/60 border-purple-500/15;
+}
+.light .skeleton {
+  @apply bg-slate-900/5;
+}
+.light ::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.35);
 }

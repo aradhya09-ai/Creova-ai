@@ -5,10 +5,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        void: '#05050a',
-        panel: '#0a0a14',
-        surface: '#111120',
-        elevated: '#16162a',
+        void: 'rgb(var(--c-void) / <alpha-value>)',
+        panel: 'rgb(var(--c-panel) / <alpha-value>)',
+        surface: 'rgb(var(--c-surface) / <alpha-value>)',
+        elevated: 'rgb(var(--c-elevated) / <alpha-value>)',
         border: 'rgba(139, 92, 246, 0.12)',
         primary: {
           400: '#a78bfa',

@@ -1,13 +1,15 @@
 import { motion, useScroll, useTransform } from 'framer-motion'
 import {
   Sparkle, Image as ImageIcon, Video, Mic, LayoutPanelTop, Folder, ArrowRight,
-  Github, ShieldCheck, Cpu, ChevronDown, Play, Palette, Wand,
+  Github, ShieldCheck, Cpu, ChevronDown, Play, Palette, Wand, Sun, Moon,
 } from 'lucide-react'
 import { useRef } from 'react'
 import { useAppStore } from '@/store/appStore'
 
 export default function Landing() {
   const enter = useAppStore((s) => s.enter)
+  const theme = useAppStore((s) => s.theme)
+  const setTheme = useAppStore((s) => s.setTheme)
   const sectionRef = useRef(null)
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start end', 'end start'] })
   const y1 = useTransform(scrollYProgress, [0, 1], [60, -60])
@@ -76,9 +78,18 @@ export default function Landing() {
           <a href="#features" className="transition-colors hover:text-white">Features</a>
           <a href="#architecture" className="transition-colors hover:text-white">Architecture</a>
         </div>
-        <button onClick={enter} className="btn-primary !py-2">
-          Open App <ArrowRight size={15} />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+            aria-label="Toggle theme"
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-slate-300 transition-colors hover:text-purple-400"
+          >
+            {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+          </button>
+          <button onClick={enter} className="btn-primary !py-2">
+            Open App <ArrowRight size={15} />
+          </button>
+        </div>
       </nav>
 
       {/* Hero */}
@@ -289,6 +300,16 @@ export default function Landing() {
           </div>
         </div>
       </footer>
+
+      {/* Corner branding */}
+      <a
+        href="https://github.com/aradhya09-ai"
+        target="_blank"
+        rel="noreferrer"
+        className="fixed bottom-3 right-4 z-[60] rounded-full border border-purple-500/25 bg-panel/80 px-3 py-1.5 text-xs font-semibold text-slate-400 backdrop-blur-md transition-colors hover:text-purple-400 sm:text-[13px]"
+      >
+        @aradhya_codes
+      </a>
     </div>
   )
 }
