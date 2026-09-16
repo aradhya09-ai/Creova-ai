@@ -261,7 +261,7 @@ export default function Landing() {
 
       {/* CTA */}
       <section className="relative z-10 px-5 pb-24 pt-8 text-center md:px-10">
-        <div className="relative mx-auto max-w-2xl overflow-hidden rounded-3xl border border-purple-500/25 bg-gradient-to-br from-purple-600/20 via-base to-indigo-600/20 px-8 py-14">
+        <div className="relative mx-auto max-w-2xl overflow-hidden rounded-3xl border border-purple-500/25 bg-gradient-to-br from-purple-600/20 via-panel to-indigo-600/20 px-8 py-14">
           <div className="pointer-events-none absolute inset-0 bg-grid opacity-30" />
           <h2 className="relative text-3xl font-bold text-white">Start creating — it's free.</h2>
           <p className="relative mt-3 text-slate-400">Everything works out of the box. Demo Mode included.</p>

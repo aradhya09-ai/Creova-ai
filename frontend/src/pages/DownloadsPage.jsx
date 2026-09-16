@@ -72,7 +72,7 @@ export default function DownloadsPage() {
                 transition={{ delay: i * 0.04 }}
                 className="card-hover overflow-hidden rounded-2xl border border-white/10 bg-surface"
               >
-                <div className="relative h-36 overflow-hidden bg-base">
+                <div className="relative h-36 overflow-hidden bg-panel">
                   <img src={mediaUrl(item.preview)} alt={item.prompt} className="h-full w-full object-cover" />
                   <span className="absolute left-2 top-2 inline-flex items-center gap-1.5 rounded-full bg-black/50 px-2 py-0.5 text-[10px] font-medium capitalize text-white backdrop-blur-sm">
                     <Icon size={11} className={m.tint.split(' ')[0]} /> {item.type}

@@ -139,7 +139,7 @@ export default function ProjectDetail() {
                 transition={{ delay: i * 0.04 }}
                 className="group flex items-center gap-4 rounded-xl border border-white/10 bg-surface p-3 transition-all hover:border-purple-500/30"
               >
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-base">
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-panel">
                   {a.url ? (
                     a.type === 'video' ? (
                       <video src={mediaUrl(a.url)} className="h-full w-full object-cover" muted />

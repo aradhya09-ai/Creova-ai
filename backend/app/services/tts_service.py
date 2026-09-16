@@ -80,7 +80,7 @@ def _edge_tts(text, voice="female", speed=1.0, pitch_shift=0.0):
     voice_map = {
         "female": "en-US-JennyNeural",
         "male": "en-US-GuyNeural",
-        "neutral": "en-US-ArianaNeural",
+        "neutral": "en-US-AriaNeural",
     }
     edge_voice = voice_map.get((voice or "female").lower(), "en-US-JennyNeural")
     delta = round((speed - 1.0) * 100)

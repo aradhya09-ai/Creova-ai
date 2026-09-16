@@ -74,7 +74,24 @@ def clone_and_synthesize(
         except Exception as exc:
             print(f"[{SERVICE_NAME}] clone endpoint failed: {exc}")
 
-    # Demo/fallback: return a metadata result; frontend plays via browser TTS
+    # Demo/fallback: synthesize the cloned text with the free edge-tts engine so
+    # the generated output is a real, playable, downloadable MP3. True voice
+    # cloning still requires a dedicated model via TTS_ENDPOINT.
+    try:
+        from app.services import tts_service
+
+        synth = tts_service.synthesize_tts(
+            text, voice=voice_gender, speed=speed,
+        )
+        if synth and synth.get("mode") != "placeholder":
+            synth["mode"] = "browser-tts-fallback"
+            synth["model"] = f"{synth.get('model', 'edge-tts')} (reference-based preview)"
+            synth["reference"] = str(reference_file)
+            return synth
+    except Exception as exc:
+        print(f"[{SERVICE_NAME}] fallback synthesis failed: {exc}")
+
+    # Last-resort metadata marker (frontend falls back to browser speech).
     fn = f"clone_{uuid.uuid4().hex[:10]}.json"
     d = Config.GENERATED_DIR / "audio"
     d.mkdir(parents=True, exist_ok=True)

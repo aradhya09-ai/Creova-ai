@@ -253,6 +253,7 @@ function CloneView({ push }) {
   const [text, setText] = useState('Hello, this is my cloned voice speaking.')
   const [cloning, setCloning] = useState(false)
   const [voices, setVoices] = useState([])
+  const [preview, setPreview] = useState(null)
 
   const fileRef = useRef(null)
   const synthSupported = typeof window !== 'undefined' && 'speechSynthesis' in window
@@ -289,10 +290,17 @@ function CloneView({ push }) {
         text,
         speed: '1.0',
       })
-      push({ type: 'success', title: 'Voice cloned', message: `${name} added to your voices.` })
+      const r = res.result || {}
+      if (r.url) {
+        setPreview({ ...r, text })
+        push({ type: 'success', title: 'Voice ready', message: `${name}: output generated and ready to play.` })
+      } else {
+        setPreview(null)
+        push({ type: 'demo', title: 'Browser fallback', message: 'No cloning model configured; playback uses browser speech. Add a Coqui XTTS/OpenVoice endpoint for real cloning.' })
+      }
       await load()
-      if (res.result?.mode === 'browser-tts-fallback' || !res.result?.url?.includes('.wav')) {
-        toast.demo('Browser fallback', 'No cloning model configured. Playback uses browser speech; add a Coqui XTTS/OpenVoice endpoint for real cloning.')
+      if (res.result?.mode === 'browser-tts-fallback') {
+        toast.demo('Preview voice', 'The output is a reference-based preview — configure TTS_ENDPOINT for true voice cloning.')
       }
     } catch (e) {
       toast.error('Cloning failed', e.message || 'Check server configuration.')
@@ -356,13 +364,35 @@ function CloneView({ push }) {
       </div>
 
       <div className="space-y-5">
-        <div className="panel p-5">
-          <label className="label mb-2">Text to speak</label>
-          <textarea rows={4} value={text} onChange={(e) => setText(e.target.value)} className="input resize-none" placeholder="Enter text to speak..." />
-          <button onClick={clone} disabled={cloning} className="btn-primary mt-4 w-full !py-3">
-            {cloning ? <><Sparkles size={17} className="animate-pulse" /> Cloning…</> : <><UserCog size={17} /> Generate cloned voice</>}
-          </button>
-        </div>
+<div className="panel p-5">
+            <label className="label mb-2">Text to speak</label>
+            <textarea rows={4} value={text} onChange={(e) => setText(e.target.value)} className="input resize-none" placeholder="Enter text to speak..." />
+            <button onClick={clone} disabled={cloning} className="btn-primary mt-4 w-full !py-3">
+              {cloning ? <><Sparkles size={17} className="animate-pulse" /> Cloning…</> : <><UserCog size={17} /> Generate cloned voice</>}
+            </button>
+          </div>
+
+        {preview?.url && (
+          <div className="panel p-5">
+            <label className="label mb-3">Latest output</label>
+            <div className="space-y-3">
+              <audio src={mediaUrl(preview.url)} controls className="w-full" />
+              <div className="flex gap-2">
+                <button onClick={async () => {
+                  try { await downloads.save(mediaUrl(preview.url), 'clone-output.mp3'); toast.success('Download started', 'MP3 saved.') } catch (e) { toast.error('Download failed', e.message) }
+                }} className="btn-outline !py-2 text-xs flex-1"><Download size={14} /> Download MP3</button>
+                <button onClick={async () => {
+                  try { await downloads.save(mediaUrl(preview.url), 'clone-output.wav'); toast.success('Download started', 'Saved.') } catch (e) { toast.error('Download failed', e.message) }
+                }} className="btn-outline !py-2 text-xs flex-1"><Download size={14} /> WAV</button>
+              </div>
+              {preview.mode === 'browser-tts-fallback' && (
+                <p className="text-[11px] text-slate-500">
+                  Reference-based preview. Configure a cloning model (TTS_ENDPOINT) for a true match to the uploaded voice.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="panel p-5">
           <label className="label mb-3">Your voices</label>
@@ -381,7 +411,13 @@ function CloneView({ push }) {
                     <p className="truncate text-sm font-medium text-white">{v.name}</p>
                     <p className="text-[11px] capitalize text-slate-500">{v.gender} · {formatDate(v.created_at)}</p>
                   </div>
-                  <button className="btn-ghost !px-2 !py-1.5" onClick={() => toast.info('Playback', synthSupported ? 'Browser speech preview.' : 'Speech synthesis not available.')}>
+                  <button className="btn-ghost !px-2 !py-1.5" onClick={() => {
+                    if (!synthSupported) { toast.error('Playback', 'Speech synthesis not available in this browser.'); return }
+                    window.speechSynthesis.cancel()
+                    const u = new SpeechSynthesisUtterance(`Hello, this is ${v.name}.`)
+                    u.rate = 1
+                    window.speechSynthesis.speak(u)
+                  }}>
                     <Play size={14} />
                   </button>
                   <button className="btn-ghost !px-2 !py-1.5 text-rose-400/70 hover:!text-rose-400" onClick={() => deleteVoice(v.id)}>

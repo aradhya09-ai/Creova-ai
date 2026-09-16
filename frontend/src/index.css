@@ -44,7 +44,7 @@
     @apply btn text-slate-400 hover:text-white hover:bg-white/5;
   }
   .input {
-    @apply w-full rounded-xl bg-base/80 border border-purple-500/15 px-4 py-3 text-sm text-slate-200 placeholder-slate-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500/40 focus:border-purple-500/40;
+    @apply w-full rounded-xl bg-panel/80 border border-purple-500/15 px-4 py-3 text-sm text-slate-200 placeholder-slate-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500/40 focus:border-purple-500/40;
   }
   .chip {
     @apply cursor-pointer rounded-full border px-4 py-2 text-sm font-medium transition-all duration-200;

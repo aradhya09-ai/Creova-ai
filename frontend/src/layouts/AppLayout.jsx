@@ -50,7 +50,7 @@ export default function AppLayout({ children }) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-[248px] flex-col border-r border-purple-500/10 bg-base/95 backdrop-blur-xl transition-transform duration-300 lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-[248px] flex-col border-r border-purple-500/10 bg-panel/95 backdrop-blur-xl transition-transform duration-300 lg:static lg:translate-x-0 ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -133,7 +133,7 @@ export default function AppLayout({ children }) {
       {/* Main col */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Topbar */}
-        <header className="flex items-center gap-3 border-b border-purple-500/10 bg-base/70 px-4 py-3 backdrop-blur-xl lg:px-6">
+        <header className="flex items-center gap-3 border-b border-purple-500/10 bg-panel/70 px-4 py-3 backdrop-blur-xl lg:px-6">
           <button
             onClick={() => setMobileOpen(true)}
             className="rounded-xl border border-purple-500/20 p-2 text-slate-300 lg:hidden"

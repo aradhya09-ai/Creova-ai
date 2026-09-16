@@ -1,4 +1,5 @@
 """Voice cloning API routes."""
+import asyncio
 import uuid
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
@@ -9,6 +10,12 @@ from app.services import voice_clone_service
 router = APIRouter(prefix="/api/voice", tags=["voice"])
 
 ALLOWED_EXTS = {".mp3", ".wav", ".m4a", ".ogg", ".webm"}
+
+
+async def _run_in_thread(func, **kwargs):
+    """Run a blocking function off the event loop (edge-tts needs its own loop)."""
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(None, lambda: func(**kwargs))
 
 
 @router.post("/clone")
@@ -37,7 +44,8 @@ async def clone_voice(
 
     ref_path, ref_fn = voice_clone_service.save_reference_audio(content, orig)
 
-    result = voice_clone_service.clone_and_synthesize(
+    result = await _run_in_thread(
+        voice_clone_service.clone_and_synthesize,
         reference_file=ref_path,
         text=text,
         voice_name=voice_name,

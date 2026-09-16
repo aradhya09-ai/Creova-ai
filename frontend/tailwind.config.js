@@ -6,7 +6,7 @@ export default {
     extend: {
       colors: {
         void: '#05050a',
-        base: '#0a0a14',
+        panel: '#0a0a14',
         surface: '#111120',
         elevated: '#16162a',
         border: 'rgba(139, 92, 246, 0.12)',

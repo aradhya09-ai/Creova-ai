@@ -101,7 +101,7 @@ export default function Projects() {
               >
                 <button onClick={() => navigate(`/projects/${p.id}`)} className="block w-full text-left">
                   {/* Preview wall */}
-                  <div className="flex h-36 gap-1.5 overflow-hidden bg-base p-1.5">
+                  <div className="flex h-36 gap-1.5 overflow-hidden bg-panel p-1.5">
                     {assets.length === 0 ? (
                       <div className="flex w-full items-center justify-center gap-2 text-slate-600">
                         <Folder size={22} />
